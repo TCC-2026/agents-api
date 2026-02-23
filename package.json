@@ -1,0 +1,24 @@
+{
+  "name": "agents-api",
+  "version": "1.0.0",
+  "description": "api to provide AI agents services",
+  "homepage": "https://github.com/TCC-2026/agents-api#readme",
+  "bugs": {
+    "url": "https://github.com/TCC-2026/agents-api/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TCC-2026/agents-api.git"
+  },
+  "license": "ISC",
+  "author": "Lucas Sartorelli Leinatti",
+  "type": "commonjs",
+  "main": "express.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node express.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
