@@ -1,9 +1,17 @@
 const { createClient } = require('../services/ClientService');
+const { createClientSchema } = require('../schemas/clientSchema');
 
 const register = async (req, res) => {
 
     try {
-        const { name } = req.body;
+        const validation = createClientSchema.safeParse(req.body);
+
+        if (!validation.success) {
+            const errorMessage = validation.error.issues[0].message;
+            return res.status(400).json({ error: errorMessage });
+        }
+
+        const { name } = validation.data;
 
         if (!name) {
             return res.status(400).json({ error: "O parâmetro 'name' é obrigatório." });

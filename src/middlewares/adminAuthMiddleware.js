@@ -1,4 +1,4 @@
-const clientMiddleware = (req, res, next) => {
+const adminAuthMiddleware = (req, res, next) => {
 
     try {
         const authHeader = req.headers.authorization;
@@ -15,10 +15,10 @@ const clientMiddleware = (req, res, next) => {
 
         next();
     } catch (error) {
-        console.log("Error in clientMiddleware:", error);
+        console.log("Error in adminAuthMiddleware:", error);
         return res.status(500).json({ error: "Erro interno na autenticação da requisição.", message: error.message });
     }
     
 };
 
-module.exports = clientMiddleware;
+module.exports = adminAuthMiddleware;
