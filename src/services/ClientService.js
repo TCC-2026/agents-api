@@ -1,5 +1,5 @@
-const prisma = require('../utils/prisma.js');
-const crypto = require('crypto');
+import prisma from '../utils/prisma.js';
+import crypto from 'crypto';
 
 const createClient = async (name) => {
 
@@ -20,4 +20,4 @@ const createClient = async (name) => {
 
 };
 
-module.exports = { createClient };
+export default createClient;

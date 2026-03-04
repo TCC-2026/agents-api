@@ -1,5 +1,5 @@
-const { createClient } = require('../services/ClientService');
-const { createClientSchema } = require('../schemas/clientSchema');
+import createClient from '../services/ClientService.js';
+import createClientSchema from '../schemas/clientSchema.js';
 
 const register = async (req, res) => {
 
@@ -36,4 +36,4 @@ const register = async (req, res) => {
 
 };
 
-module.exports = { register };
+export default { register };

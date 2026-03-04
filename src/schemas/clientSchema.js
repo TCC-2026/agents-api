@@ -1,4 +1,4 @@
-const { z } = require('zod');
+import z from 'zod';
 
 const createClientSchema = z.object({
     name: z.string({
@@ -7,4 +7,4 @@ const createClientSchema = z.object({
     }).min(3, "O nome do cliente deve ter pelo menos 3 caracteres.")
 });
 
-module.exports = { createClientSchema };
+export default createClientSchema;
