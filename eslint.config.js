@@ -3,6 +3,9 @@ import prettierConfig from 'eslint-config-prettier';
 import globals from 'globals';
 
 export default [
+   {
+      ignores: ['src/utils/logger.js']
+   },
    js.configs.recommended,
    prettierConfig,
    {
