@@ -1,32 +1,42 @@
 {
-  "name": "agents-api",
-  "version": "1.0.0",
-  "description": "api to provide AI agents services",
-  "homepage": "https://github.com/TCC-2026/agents-api#readme",
-  "bugs": {
-    "url": "https://github.com/TCC-2026/agents-api/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/TCC-2026/agents-api.git"
-  },
-  "license": "ISC",
-  "author": "Lucas Sartorelli Leinatti",
-  "type": "module",
-  "main": "express.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/server.js"
-  },
-  "dependencies": {
-    "@prisma/adapter-pg": "^7.4.2",
-    "@prisma/client": "^7.4.1",
-    "dotenv": "^17.3.1",
-    "express": "^5.2.1",
-    "pg": "^8.19.0",
-    "zod": "^4.3.6"
-  },
-  "devDependencies": {
-    "prisma": "^7.4.1"
-  }
+   "name": "agents-api",
+   "version": "1.0.0",
+   "description": "api to provide AI agents services",
+   "homepage": "https://github.com/TCC-2026/agents-api#readme",
+   "bugs": {
+      "url": "https://github.com/TCC-2026/agents-api/issues"
+   },
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/TCC-2026/agents-api.git"
+   },
+   "license": "ISC",
+   "author": "Lucas Sartorelli Leinatti",
+   "type": "module",
+   "main": "express.js",
+   "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "start": "node src/server.js",
+      "dev": "nodemon src/server.js",
+      "lint": "eslint src/",
+      "lint:fix": "eslint src/ --fix",
+      "format": "prettier --write \"src/**/*.js\""
+   },
+   "dependencies": {
+      "@prisma/adapter-pg": "^7.4.2",
+      "@prisma/client": "^7.4.1",
+      "dotenv": "^17.3.1",
+      "express": "^5.2.1",
+      "pg": "^8.19.0",
+      "zod": "^4.3.6"
+   },
+   "devDependencies": {
+      "@eslint/js": "^10.0.1",
+      "eslint": "^10.0.3",
+      "eslint-config-prettier": "^10.1.8",
+      "globals": "^17.4.0",
+      "nodemon": "^3.1.14",
+      "prettier": "^3.8.1",
+      "prisma": "^7.4.1"
+   }
 }
