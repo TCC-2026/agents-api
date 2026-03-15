@@ -16,7 +16,13 @@ const generate = async (req, res) => {
 
         return res.status(200).json({ insight: response });
     } catch (error) {
-        LOGGER('error', 'Error generating insight:', error);
+        if (error.status == 429) {
+            LOGGER('warn', 'Limite de requisições atingido: ', error);
+            return res
+                .status(429)
+                .json({ error: 'Limite de requisições atingido.', message: error.message });
+        }
+        LOGGER('error', 'Erro gerando insight: ', error);
         return res.status(500).json({ error: 'Erro interno do servidor.', message: error.message });
     }
 };
