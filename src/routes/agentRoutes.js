@@ -4,10 +4,10 @@ import adminAuthMiddleware from '../middlewares/adminAuthMiddleware.js';
 
 const aiRoutes = Router();
 
-aiRoutes.post('/assistant', adminAuthMiddleware, InsightController.generate);
-aiRoutes.post('/goal', adminAuthMiddleware, InsightController.generate);
-aiRoutes.post('/insight', InsightController.generate);
-aiRoutes.post('/import', adminAuthMiddleware, InsightController.generate);
-aiRoutes.post('/categorization', adminAuthMiddleware, InsightController.generate);
+aiRoutes.post('/assistant', adminAuthMiddleware, InsightController.generateInsight);
+aiRoutes.post('/goal', adminAuthMiddleware, InsightController.generateInsight);
+aiRoutes.post('/insight', InsightController.generateInsight);
+aiRoutes.post('/import', adminAuthMiddleware, InsightController.generateInsight);
+aiRoutes.post('/categorization', adminAuthMiddleware, InsightController.generateInsight);
 
 export default aiRoutes;

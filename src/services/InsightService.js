@@ -1,41 +1,61 @@
 import LOGGER from '../utils/logger.js';
 import ai from '../config/gemini.js';
+import AgentRepository from '../repositories/AgentRepository.js';
+
+const sendMessage = async (agent, context, hoje) => {
+    if (!agent) {
+        throw new Error('Agente não encontrado na fila de fallback.');
+    }
+
+    try {
+        LOGGER(
+            'info',
+            `Tentando gerar insight com modelo: ${agent.modelVersion}: `,
+            agent.prompt.replace('${hoje}', hoje)
+        );
+
+        const response = await ai.models.generateContent({
+            model: agent.modelVersion,
+            contents: `Contexto do usuário: ${context}`,
+            config: {
+                tools: [{ googleSearch: {} }],
+                temperature: agent.temperature,
+                systemInstruction: agent.prompt.replace('${hoje}', hoje)
+            }
+        });
+
+        return response.text;
+    } catch (error) {
+        if (error.status === 429 && agent.fallbackAgentId) {
+            const nextAgent = await AgentRepository.selectAgentById(agent.fallbackAgentId);
+            LOGGER(
+                'warn',
+                `Erro 429 de limite de uso para o modelo: ${agent.modelVersion}. Saltando para o modelo fallback: ${nextAgent.modelVersion}`
+            );
+            return await sendMessage(nextAgent, context, hoje);
+        }
+        throw error;
+    }
+};
 
 const generate = async (context) => {
     try {
         const hoje = new Date().toLocaleDateString('pt-BR');
-        const systemInstruction = `
-        Você é o motor de notificações push de um app financeiro voltado para educação financeira. Hoje é dia ${hoje}.
-        Seu objetivo é gerar UM ÚNICO ALERTA baseado no contexto do usuário.
-        O conteúdo do alerta deve ser:
-        1. Curiosidades educacionais sobre finanças.
-        2. Dicas práticas para melhorar a saúde financeira.
-        4. Riscos de inadimplência, se o contexto indicar que o usuário pode estar próximo disso.
-        5. Dicas de economia, se o contexto indicar que o usuário tem gastos elevados em alguma categoria.
-        6. Notícias bombasticas de hoje que afetam a econômia brasileira ou mundial.
 
-        REGRAS DE OURO (ESTRITAMENTE OBRIGATÓRIAS):
-        1. RETORNE APENAS UMA ÚNICA FRASE CURTA.
-        2. NÃO escreva saudações (ex: "Olá", "Aqui está", "Fiquei de olho").
-        3. NÃO use bullet points, asteriscos ou quebras de linha.
-        4. MÁXIMO DE 12 PALAVRAS.
-        5. Seja direto e com tom de manchete de jornal.
+        const primaryAgent = await AgentRepository.selectAgentByService(
+            'Insight',
+            process.env.PRIMARY_INSIGHT_MODEL
+        );
 
-        FORA DO ESCOPO: Investimentos, criptomoedas, ações, renda variável, análises de mercado, dicas de apps financeiros, dicas de bancos, dicas de cartões de crédito, dicas de empréstimos, dicas de financiamentos, dicas de seguros, dicas de previdência privada.
-        `;
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash-lite',
-            contents: systemInstruction + ' Contexto do usuário: ' + context,
-            //history: prompt,
-            config: {
-                tools: [{ googleSearch: {} }],
-                temperature: 0.7
-            }
-        });
-        LOGGER('info', 'Insight generated successfully:', response.text);
-        return response.text;
+        if (!primaryAgent) {
+            throw new Error(
+                `Agente primário (${process.env.PRIMARY_INSIGHT_MODEL}) não encontrado no banco.`
+            );
+        }
+
+        return await sendMessage(primaryAgent, context, hoje);
     } catch (error) {
-        LOGGER('error', 'Error in service generating insight:', error);
+        LOGGER('error', 'Erro ao gerar insight: ', error);
         throw error;
     }
 };

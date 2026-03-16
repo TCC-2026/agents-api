@@ -2,8 +2,9 @@ import insightSchema from '../schemas/insightSchema.js';
 import InsightService from '../services/InsightService.js';
 import LOGGER from '../utils/logger.js';
 
-const generate = async (req, res) => {
+const generateInsight = async (req, res) => {
     try {
+        LOGGER('info', 'Iniciando geração de insight...', req.body);
         const validation = insightSchema.safeParse(req.body);
 
         if (!validation.success) {
@@ -14,6 +15,7 @@ const generate = async (req, res) => {
         const { context } = validation.data;
         const response = await InsightService.generate(context);
 
+        LOGGER('info', 'Insight gerado com sucesso: ', response);
         return res.status(200).json({ insight: response });
     } catch (error) {
         if (error.status == 429) {
@@ -27,4 +29,4 @@ const generate = async (req, res) => {
     }
 };
 
-export default { generate };
+export default { generateInsight };

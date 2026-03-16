@@ -10,7 +10,7 @@ const insert = async (name, apiKey) => {
             }
         });
     } catch (error) {
-        LOGGER('error', 'Error in repository registering client: ', error);
+        LOGGER('error', 'Erro ao registrar cliente no repositório: ', error);
         throw error;
     }
 };
@@ -23,7 +23,7 @@ const selectByApiKey = async (apiKey) => {
             }
         });
     } catch (error) {
-        LOGGER('error', 'Error in repository finding client by API Key: ', error);
+        LOGGER('error', 'Erro ao encontrar cliente pelo API Key: ', error);
         throw error;
     }
 };
