@@ -21,10 +21,14 @@ const sendMessage = async (context, history, message) => {
         const instructions =
             prompt + ' \n DADOS DE SISTEMA - CONTEXTO ATUAL DO USUÁRIO: \n\n' + context;
 
-        const content = history.map((msg) => ({
-            role: msg.role === 'assistant' ? 'model' : msg.role,
-            parts: [{ text: msg.content }]
-        }));
+        let content = [];
+
+        if (history) {
+            content = history.map((msg) => ({
+                role: msg.role === 'assistant' ? 'model' : msg.role,
+                parts: [{ text: msg.content }]
+            }));
+        }
 
         content.push({
             role: 'user',

@@ -1,0 +1,83 @@
+import prisma from '../config/prisma.js';
+import LOGGER from '../utils/logger.js';
+
+const findActiveSessionByPhone = async (phone) => {
+    try {
+        return await prisma.session.findFirst({
+            where: {
+                phone: phone,
+                status: 'ACTIVE'
+            }
+        });
+    } catch (error) {
+        LOGGER('error', `Erro ao buscar sessão ativa para o telefone ${phone}:`, error);
+        throw error;
+    }
+};
+
+const createSession = async (phone, context = '') => {
+    try {
+        return await prisma.session.create({
+            data: {
+                phone: phone,
+                status: 'ACTIVE',
+                currentContext: context
+            }
+        });
+    } catch (error) {
+        LOGGER('error', `Erro ao criar nova sessão para o telefone ${phone}:`, error);
+        throw error;
+    }
+};
+
+const saveMessage = async (sessionId, role, content) => {
+    try {
+        return await prisma.message.create({
+            data: {
+                sessionId: sessionId,
+                role: role, // 'user', 'assistant' ou 'model'
+                content: content
+            }
+        });
+    } catch (error) {
+        LOGGER('error', `Erro ao salvar mensagem na sessão ${sessionId}:`, error);
+        throw error;
+    }
+};
+
+const getSessionHistory = async (sessionId) => {
+    try {
+        return await prisma.message.findMany({
+            where: {
+                sessionId: sessionId
+            },
+            orderBy: {
+                createdAt: 'asc' // Traz da mais antiga para a mais nova (ordem natural da conversa)
+            },
+            take: 20 // Limite de segurança
+        });
+    } catch (error) {
+        LOGGER('error', `Erro ao buscar histórico da sessão ${sessionId}:`, error);
+        throw error;
+    }
+};
+
+const closeSession = async (sessionId) => {
+    try {
+        return await prisma.session.update({
+            where: { id: sessionId },
+            data: { status: 'CLOSED' }
+        });
+    } catch (error) {
+        LOGGER('error', `Erro ao encerrar a sessão ${sessionId}:`, error);
+        throw error;
+    }
+};
+
+export default {
+    findActiveSessionByPhone,
+    createSession,
+    saveMessage,
+    getSessionHistory,
+    closeSession
+};
