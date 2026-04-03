@@ -9,7 +9,7 @@ const conversation = async (req, res) => {
         const bodyValid = assistantSchema.safeParse(req.body);
         const { context, history, message } = bodyValid.data;
 
-        const response = await AssistantService.sendMessage(context, history, message);
+        const response = await AssistantService.sendMessage(context, history, message, null);
 
         LOGGER('info', 'Resposta gerada com sucesso: ', response);
         return res.status(200).json({ response });

@@ -29,6 +29,7 @@
       "body-parser": "^2.2.2",
       "dotenv": "^17.3.1",
       "express": "^5.2.1",
+      "firebase-admin": "^13.7.0",
       "groq-sdk": "^1.1.1",
       "pg": "^8.19.0",
       "twilio": "^5.13.1",

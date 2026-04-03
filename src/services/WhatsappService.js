@@ -5,7 +5,7 @@ import pkg from 'twilio';
 const { twiml } = pkg;
 const { MessagingResponse } = twiml;
 
-const whatsappHandler = async (usuario, msgRecebida) => {
+const whatsappHandler = async (usuario, msgRecebida, audio) => {
     // Busca a sessão
     let session = await ChatRepository.findActiveSessionByPhone(usuario);
     if (!session) {
@@ -29,7 +29,8 @@ const whatsappHandler = async (usuario, msgRecebida) => {
     const responseText = await AssistantService.sendMessage(
         session.currentContext || '',
         history,
-        msgRecebida
+        msgRecebida,
+        audio
     );
 
     // Salva a resposta da IA
