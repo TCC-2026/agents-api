@@ -15,13 +15,14 @@ const findActiveSessionByPhone = async (phone) => {
     }
 };
 
-const createSession = async (phone, context = '') => {
+const createSession = async (phone, context = '', firebaseUserId = null) => {
     try {
         return await prisma.session.create({
             data: {
                 phone: phone,
                 status: 'ACTIVE',
-                currentContext: context
+                currentContext: context,
+                firebaseUserId: firebaseUserId
             }
         });
     } catch (error) {
@@ -30,13 +31,14 @@ const createSession = async (phone, context = '') => {
     }
 };
 
-const saveMessage = async (sessionId, role, content) => {
+const saveMessage = async (sessionId, role, content, agentId = null) => {
     try {
         return await prisma.message.create({
             data: {
                 sessionId: sessionId,
                 role: role, // 'user', 'assistant' ou 'model'
-                content: content
+                content: content,
+                agentId: agentId
             }
         });
     } catch (error) {
@@ -52,9 +54,9 @@ const getSessionHistory = async (sessionId) => {
                 sessionId: sessionId
             },
             orderBy: {
-                createdAt: 'asc' // Traz da mais antiga para a mais nova (ordem natural da conversa)
+                createdAt: 'asc' // Traz da mais antiga para a mais nova
             },
-            take: 20 // Limite de segurança
+            take: 50 // Limite de segurança
         });
     } catch (error) {
         LOGGER('error', `Erro ao buscar histórico da sessão ${sessionId}:`, error);

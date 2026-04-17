@@ -27,6 +27,7 @@ const whatsappWebHook = async (req, res) => {
         );
 
         // Responde para a Twilio
+        LOGGER('info', `Resposta: ${twimlResponse}`);
         res.writeHead(200, { 'Content-Type': 'text/xml' });
         res.end(twimlResponse.toString());
     } catch (error) {

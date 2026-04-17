@@ -13,6 +13,7 @@ model Client {
   isActive  Boolean  @default(true) @map("is_active")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+  sessions  Session[]
 
   @@map("clients")
 }
@@ -31,6 +32,7 @@ model Agent {
   maxTokens       Int      @default(150)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  messages        Message[]
 
   @@map("agents")
 }
@@ -43,17 +45,22 @@ model Session {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   messages       Message[]
+  clientId       String?  
+  client         Client?  @relation(fields: [clientId], references: [id])
+  firebaseUserId    String?
 
   @@map("sessions")
 }
 
 model Message {
   id            String      @id @default(uuid())
-  sessionId String
   role          String      // 'user', 'assistant' ou 'model'
   content       String      @db.Text
   createdAt     DateTime    @default(now())
-  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sessionId String
+  session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  agentId   String?  
+  agent     Agent?   @relation(fields: [agentId], references: [id])
 
   @@map("messages")
 }

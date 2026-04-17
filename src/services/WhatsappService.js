@@ -1,6 +1,7 @@
 import LOGGER from '../utils/logger.js';
 import AssistantService from '../services/AssistantService.js';
 import ChatRepository from '../repositories/ChatRepository.js';
+import FinanceRepository from '../repositories/FinanceRepository.js';
 import pkg from 'twilio';
 const { twiml } = pkg;
 const { MessagingResponse } = twiml;
@@ -9,9 +10,11 @@ const whatsappHandler = async (usuario, msgRecebida, audio) => {
     // Busca a sessão
     let session = await ChatRepository.findActiveSessionByPhone(usuario);
     if (!session) {
+        const firebaseUserId = await FinanceRepository.getUserIdByPhone(usuario);
         session = await ChatRepository.createSession(
             usuario,
-            'O usuário é novo no app.' // contexto
+            'O usuário é novo no app.',
+            firebaseUserId
         );
     }
 
@@ -26,18 +29,19 @@ const whatsappHandler = async (usuario, msgRecebida, audio) => {
     await ChatRepository.saveMessage(session.id, 'user', msgRecebida);
 
     // Chama a IA
-    const responseText = await AssistantService.sendMessage(
+    const response = await AssistantService.sendMessage(
         session.currentContext || '',
         history,
         msgRecebida,
-        audio
+        audio,
+        session.firebaseUserId
     );
 
     // Salva a resposta da IA
-    await ChatRepository.saveMessage(session.id, 'model', responseText);
+    await ChatRepository.saveMessage(session.id, 'model', response.text, response.agentId);
 
     const twimlResponse = new MessagingResponse();
-    return twimlResponse.message(responseText);
+    return twimlResponse.message(response.text);
 };
 
 export default { whatsappHandler };

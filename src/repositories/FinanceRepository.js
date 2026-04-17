@@ -4,8 +4,8 @@ import LOGGER from '../utils/logger.js';
 const getUserIdByPhone = async (twilioPhone) => {
     try {
         // Formato do Twilio (whatsapp:+5519123450000)
-        // cleanPhone (19123450000)
-        const cleanPhone = twilioPhone.replace('whatsapp:', '').replace('+55', '');
+        // cleanPhone (+5519123450000)
+        const cleanPhone = twilioPhone.replace('whatsapp:', '');
 
         const usersRef = db.collection('users');
         const user = await usersRef.where('phone', '==', cleanPhone).get();
