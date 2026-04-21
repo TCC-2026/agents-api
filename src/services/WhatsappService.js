@@ -6,7 +6,7 @@ import pkg from 'twilio';
 const { twiml } = pkg;
 const { MessagingResponse } = twiml;
 
-const whatsappHandler = async (usuario, msgRecebida, audio) => {
+const whatsappHandler = async (usuario, msgRecebida, mediaData) => {
     // Busca a sessão
     let session = await ChatRepository.findActiveSessionByPhone(usuario);
     if (!session) {
@@ -33,7 +33,7 @@ const whatsappHandler = async (usuario, msgRecebida, audio) => {
         session.currentContext || '',
         history,
         msgRecebida,
-        audio,
+        mediaData,
         session.firebaseUserId
     );
 

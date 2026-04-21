@@ -11,10 +11,10 @@ const whatsappWebHook = async (req, res) => {
         const usuario = req.body.From; // ex: 'whatsapp:+5511999999999'
         const mediaUrl = req.body.MediaUrl0;
         const mimeType = req.body.MediaContentType0;
-        let base64Audio = null;
+        let mediaData = null;
 
-        if (mediaUrl && mimeType && mimeType.startsWith('audio/')) {
-            base64Audio = await audioHandler(mediaUrl, mimeType);
+        if (mediaUrl && mimeType) {
+            mediaData = await mediaHandler(mediaUrl, mimeType);
         }
 
         LOGGER('info', `Mensagem recebida do WhatsApp (${usuario}): ${msgRecebida}.`);
@@ -23,7 +23,7 @@ const whatsappWebHook = async (req, res) => {
         const twimlResponse = await WhatsappService.whatsappHandler(
             usuario,
             msgRecebida,
-            base64Audio
+            mediaData
         );
 
         // Responde para a Twilio
@@ -43,21 +43,29 @@ const whatsappWebHook = async (req, res) => {
     }
 };
 
-const audioHandler = async (mediaUrl, mimeType) => {
-    LOGGER('info', `Mensagem de áudio recebida. URL: ${mediaUrl}, Tipo: ${mimeType}`);
+const mediaHandler = async (mediaUrl, mimeType) => {
+    LOGGER('info', `Baixando mídia do WhatsApp: ${mediaUrl} [${mimeType}]`);
 
     const twilioAuth = Buffer.from(
         `${process.env.TWILIO_ACCOUNT_SID}:${process.env.TWILIO_AUTH_TOKEN}`
     ).toString('base64');
 
-    const audioResponse = await fetch(mediaUrl, {
+    const mediaResponse = await fetch(mediaUrl, {
         headers: {
             Authorization: `Basic ${twilioAuth}`
         }
     });
 
-    const arrayBuffer = await audioResponse.arrayBuffer();
-    return Buffer.from(arrayBuffer).toString('base64');
+    if (!mediaResponse.ok) {
+        throw new Error(`Twilio recusou o download: ${mediaResponse.statusText}`);
+    }
+
+    const arrayBuffer = await mediaResponse.arrayBuffer();
+    const base64Data = Buffer.from(arrayBuffer).toString('base64');
+    return {
+        mimeType: mimeType,
+        data: base64Data
+    };
 };
 
 export default { whatsappWebHook };

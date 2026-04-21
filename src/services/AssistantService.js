@@ -2,7 +2,8 @@ import LOGGER from '../utils/logger.js';
 import ai from '../config/gemini.js';
 import AgentRepository from '../repositories/AgentRepository.js';
 import { availableTools, getGeminiToolsDeclaration } from '../tools/index.js';
-const sendMessage = async (context, history, message, audio, firebaseUserId) => {
+
+const sendMessage = async (context, history, message, media, firebaseUserId) => {
     try {
         LOGGER('info', 'Iniciando o serviço de Assistant');
 
@@ -21,7 +22,7 @@ const sendMessage = async (context, history, message, audio, firebaseUserId) => 
         const prompt = agent.prompt.replace('${hoje}', hoje);
         const instructions =
             prompt + ' \n DADOS DE SISTEMA - CONTEXTO ATUAL DO USUÁRIO: \n\n' + context;
-        const content = constructContent(history, message, audio);
+        const content = constructContent(history, message, media);
 
         const payload = {
             model: 'gemini-3.1-flash-lite-preview',
@@ -54,7 +55,7 @@ const sendMessage = async (context, history, message, audio, firebaseUserId) => 
     }
 };
 
-const constructContent = (history, message, audio) => {
+const constructContent = (history, message, media) => {
     let content = [];
 
     try {
@@ -71,17 +72,17 @@ const constructContent = (history, message, audio) => {
             userMessageParts.push({ text: message });
         }
 
-        if (audio) {
+        if (media && media.data && media.mimeType) {
             userMessageParts.push({
                 inlineData: {
-                    mimeType: 'audio/ogg', // Padrão de áudio do WhatsApp/Twilio
-                    data: audio
+                    mimeType: media.mimeType, // 'image/jpeg', 'application/pdf', 'audio/ogg', ...
+                    data: media.data // base64
                 }
             });
         }
 
         if (userMessageParts.length === 0) {
-            userMessageParts.push({ text: '[Áudio ou mensagem indisponível]' });
+            userMessageParts.push({ text: '[Arquivo indisponível ou mensagem vazia]' });
         }
 
         LOGGER('info', `userMessageParts: `, userMessageParts);
