@@ -1,9 +1,9 @@
 import LOGGER from '../utils/logger.js';
-import ai from '../config/gemini.js';
 import AgentRepository from '../repositories/AgentRepository.js';
+import AiService from './AiService.js';
 import { availableTools, getGeminiToolsDeclaration } from '../tools/index.js';
 
-const sendMessage = async (context, history, message, media, firebaseUserId) => {
+const callAgent = async (context, history, message, media, firebaseUserId) => {
     try {
         LOGGER('info', 'Iniciando o serviço de Assistant');
 
@@ -25,7 +25,7 @@ const sendMessage = async (context, history, message, media, firebaseUserId) => 
         const content = constructContent(history, message, media);
 
         const payload = {
-            model: 'gemini-3.1-flash-lite-preview',
+            model: agent.modelVersion,
             contents: content,
             config: {
                 temperature: agent.temperature,
@@ -35,18 +35,20 @@ const sendMessage = async (context, history, message, media, firebaseUserId) => 
         };
 
         LOGGER('info', `Enviando mensagem para o Assistant: `, payload);
-        const response = await ai.models.generateContent(payload);
+        let { response, agentUsed } = await AiService.sendMessage(agent, payload);
 
         if (response.functionCalls && response.functionCalls.length > 0) {
-            const finalResponse = await handleFunctionCalls(response, payload, firebaseUserId);
+            const resultPayload = await handleFunctionCalls(response, payload, firebaseUserId);
+            const finalResponse = await AiService.sendMessage(agentUsed, resultPayload);
+
             return {
-                text: finalResponse.text,
-                agentId: agent.id
+                text: finalResponse.response.text,
+                agentId: finalResponse.agentUsed.id
             };
         } else {
             return {
                 text: response.text,
-                agentId: agent.id
+                agentId: agentUsed.id
             };
         }
     } catch (error) {
@@ -134,7 +136,7 @@ const handleFunctionCalls = async (response, payload, firebaseUserId) => {
         config: payload.config
     };
 
-    return await ai.models.generateContent(secondPayload);
+    return secondPayload;
 };
 
-export default { sendMessage };
+export default { callAgent };

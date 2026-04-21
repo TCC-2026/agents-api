@@ -28,10 +28,11 @@ const processMessage = async (contactPhone, messageText, mediaData) => {
         LOGGER('info', `Sessão ${session.id}. ${history.length} mensagens:`, history);
 
         // Salva a mensagem do usuário
-        await ChatRepository.saveMessage(session.id, 'user', messageText);
+        const messageToSave = messageText + (mediaData ? ` [Mídia ${mediaData.mimeType}]` : '');
+        await ChatRepository.saveMessage(session.id, 'user', messageToSave.trimStart());
 
         // Chama a IA
-        const response = await AssistantService.sendMessage(
+        const response = await AssistantService.callAgent(
             session.currentContext || '',
             history,
             messageText,
