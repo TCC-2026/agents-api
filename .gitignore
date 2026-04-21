@@ -6,6 +6,37 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# Ignora todos os JSONs de chaves, mas GARANTE que o package.json suba!
+*.json
+!package.json
+!package-lock.json
+!jsconfig.json
+!tsconfig.json
+!firebase.json
+
+# 🖥️ Arquivos de Sistema Operacional (Muito comum vazarem)
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 🛠️ Configurações Pessoais do Editor de Código (VS Code, etc)
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# 🗄️ Banco de Dados Local (Caso você use SQLite com o Prisma para testes)
+*.db
+*.db-journal
+dev.db
+
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
