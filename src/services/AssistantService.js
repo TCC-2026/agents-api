@@ -104,7 +104,7 @@ const handleFunctionCalls = async (response, payload, firebaseUserId) => {
     const { name, args } = functionCall;
 
     LOGGER('info', `IA solicitou execução da função: ${name}`);
-    LOGGER('info', `Argumentos crus enviados pela IA:`, args);
+    LOGGER('info', `Argumentos enviados pela IA:`, args);
 
     let functionResult;
 

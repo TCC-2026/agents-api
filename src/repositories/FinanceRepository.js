@@ -1,14 +1,11 @@
 import db from '../config/firebase.js';
 import LOGGER from '../utils/logger.js';
 
-const getUserIdByPhone = async (twilioPhone) => {
+const getUserIdByPhone = async (phone) => {
     try {
-        // Formato do Twilio (whatsapp:+5519123450000)
-        // cleanPhone (+5519123450000)
-        const cleanPhone = twilioPhone.replace('whatsapp:', '');
-
+        // phone format expected (+5519123450000)
         const usersRef = db.collection('users');
-        const user = await usersRef.where('phone', '==', cleanPhone).get();
+        const user = await usersRef.where('phone', '==', phone).get();
 
         if (user.empty) return null;
         return user.docs[0].id;

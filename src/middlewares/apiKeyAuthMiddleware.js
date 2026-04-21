@@ -1,7 +1,7 @@
 import LOGGER from '../utils/logger.js';
 import ClientRepository from '../repositories/ClientRepository.js';
 
-const apiKeyMiddleware = async (req, res, next) => {
+const apiKeyAuth = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
 
@@ -27,4 +27,4 @@ const apiKeyMiddleware = async (req, res, next) => {
     }
 };
 
-export default apiKeyMiddleware;
+export default apiKeyAuth;

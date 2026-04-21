@@ -54,7 +54,7 @@ const getSessionHistory = async (sessionId) => {
                 sessionId: sessionId
             },
             orderBy: {
-                createdAt: 'asc' // Traz da mais antiga para a mais nova
+                createdAt: 'desc' // Traz da mais recente para a mais antiga
             },
             take: 50 // Limite de segurança
         });

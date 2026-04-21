@@ -1,13 +1,15 @@
 import { Router } from 'express';
-import clientRoutes from './clientRoutes.js';
-import aiRoutes from './agentRoutes.js';
-import apiKeyMiddleware from '../middlewares/apiKeyMiddleware.js';
-import WhatsappController from '../controllers/WhatsappController.js';
+import adminAuth from '../middlewares/adminAuthMiddleware.js';
+import apiKeyAuth from '../middlewares/apiKeyAuthMiddleware.js';
+import twilioAuth from '../middlewares/twilioAuthMiddleware.js';
+import ClientController from '../controllers/ClientController.js';
+import InsightController from '../controllers/InsightController.js';
+import TwilioController from '../controllers/TwilioController.js';
 
 const routes = Router();
 
-routes.use('/api/v1/client', clientRoutes);
-routes.use('/api/v1/agent', apiKeyMiddleware, aiRoutes);
-routes.use('/api/v1/whatsapp', WhatsappController.whatsappWebHook);
+routes.use('/api/v1/client', adminAuth, ClientController.register);
+routes.use('/api/v1/agent/insight', apiKeyAuth, InsightController.generateInsight);
+routes.use('/api/v1/agent/assistant/twilio', twilioAuth, TwilioController.webhook);
 
 export default routes;
