@@ -21,7 +21,7 @@
         "lint": "eslint src/",
         "lint:fix": "eslint src/ --fix",
         "format": "prettier --write \"src/**/*.js\"",
-        "postinstall": "prisma generate && npx prisma db push --accept-data-loss"
+        "postinstall": "prisma generate"
     },
     "dependencies": {
         "@google/genai": "^1.45.0",
