@@ -1,41 +1,40 @@
-const types = ['log', 'info', 'warn', 'error'];
-
-function LOGGER(type = 'log') {
+function LOGGER(type = 'info', message = '', details = null) {
     if (process.env.LOGGING === 'disabled') return;
 
-    const isKnownType = types.includes(type);
-    const index = !isKnownType ? 0 : 1;
-    const actualType = !isKnownType ? 'log' : type;
-
-    const rawMessages = Array.prototype.slice.call(arguments, index);
     const timestamp = new Date().toISOString();
+    let jsonDetails = '';
 
-    const safeMessages = rawMessages.map((msg) => {
-        if (msg instanceof Error) {
-            return JSON.stringify({
-                error_name: msg.name,
-                error_message: msg.message,
-                stack: msg.stack
+    // 3º Parâmetro: Sempre transforma em JSON, independente do que seja
+    if (details !== null && details !== undefined) {
+        // Se for um Erro (nativo ou do Prisma), extrai as propriedades antes do JSON.stringify
+        if (details instanceof Error || (details.message && details.stack)) {
+            jsonDetails = JSON.stringify({
+                error_name: details.name || 'Error',
+                error_message: details.message,
+                stack_trace: details.stack
             });
         }
-        if (typeof msg === 'object' && msg !== null) {
-            return JSON.stringify(msg);
+        // Se for qualquer outra coisa (Objeto, String, JSON do Twilio, Número), só stringifica direto
+        else {
+            jsonDetails = JSON.stringify(details);
         }
-        return msg;
-    });
+    }
 
-    switch (actualType) {
-        case 'log':
-            console.log(`[${timestamp}] [INFO]`, ...safeMessages);
+    // Monta a string final perfeitinha
+    const finalLog = `[${timestamp}] [${type.toUpperCase()}] ${message} ${jsonDetails}`.trim();
+
+    // Dispara para o console correto
+    switch (type) {
+        case 'error':
+            console.error(finalLog);
             break;
         case 'warn':
-            console.warn(`[${timestamp}] [WARN]`, ...safeMessages);
-            break;
-        case 'error':
-            console.error(`[${timestamp}] [ERROR]`, ...safeMessages);
+            console.warn(finalLog);
             break;
         case 'info':
-            console.info(`[${timestamp}] [INFO]`, ...safeMessages);
+        case 'log':
+        default:
+            console.info(finalLog);
             break;
     }
 }
