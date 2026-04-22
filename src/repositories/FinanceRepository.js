@@ -7,6 +7,11 @@ const getUserIdByPhone = async (phone) => {
         const usersRef = db.collection('users');
         const user = await usersRef.where('phone', '==', phone).get();
 
+        LOGGER(
+            'info',
+            `Busca por usuário com telefone ${phone} retornou ${user.size} resultado(s) no Firestore.`
+        );
+
         if (user.empty) return null;
         return user.docs[0].id;
     } catch (error) {
