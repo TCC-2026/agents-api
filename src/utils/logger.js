@@ -1,33 +1,43 @@
-function LOGGER(type = 'log') {
-   if (process.env.LOGGING === 'disabled') return;
-
-   const index = !types.includes(type) ? 0 : 1;
-
-   const messages = Array.prototype.slice.call(arguments, index);
-
-   switch (type) {
-      case 'log':
-         console.log(`[${new Date().toISOString()}] [INFO]`, ...messages);
-         break;
-
-      case 'warn':
-         console.warn(`[${new Date().toISOString()}] [WARN]`, ...messages);
-         break;
-
-      case 'error':
-         console.error(`[${new Date().toISOString()}] [ERROR]`, ...messages);
-         break;
-
-      case 'info':
-         console.info(`[${new Date().toISOString()}] [INFO]`, ...messages);
-         break;
-
-      default:
-         console.log(`[${new Date().toISOString()}] [INFO]`, ...messages);
-         break;
-   }
-}
-
 const types = ['log', 'info', 'warn', 'error'];
+
+function LOGGER(type = 'log') {
+    if (process.env.LOGGING === 'disabled') return;
+
+    const isKnownType = types.includes(type);
+    const index = !isKnownType ? 0 : 1;
+    const actualType = !isKnownType ? 'log' : type;
+
+    const rawMessages = Array.prototype.slice.call(arguments, index);
+    const timestamp = new Date().toISOString();
+
+    const safeMessages = rawMessages.map((msg) => {
+        if (msg instanceof Error) {
+            return JSON.stringify({
+                error_name: msg.name,
+                error_message: msg.message,
+                stack: msg.stack
+            });
+        }
+        if (typeof msg === 'object' && msg !== null) {
+            return JSON.stringify(msg);
+        }
+        return msg;
+    });
+
+    switch (actualType) {
+        case 'log':
+            console.log(`[${timestamp}] [INFO]`, ...safeMessages);
+            break;
+        case 'warn':
+            console.warn(`[${timestamp}] [WARN]`, ...safeMessages);
+            break;
+        case 'error':
+            console.error(`[${timestamp}] [ERROR]`, ...safeMessages);
+            break;
+        case 'info':
+            console.info(`[${timestamp}] [INFO]`, ...safeMessages);
+            break;
+    }
+}
 
 export default LOGGER;
