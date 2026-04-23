@@ -36,8 +36,19 @@ const backgroundProcess = async (contactPhone, message, mediaUrl, mimeType) => {
         LOGGER('info', 'Enviando resposta via Twilio:', aiResponseText);
         await TwilioService.callbackMessage(contactPhone, aiResponseText);
     } catch (error) {
-        LOGGER('error', 'Error in backgroundProcess:', error);
-        throw error;
+        if (error.code === 'FIREBASE_USER_ID_NOT_FOUND') {
+            LOGGER(
+                'warn',
+                `Número ${contactPhone} não encontrado no Firebase. Enviando mensagem de erro para o usuário.`
+            );
+            await TwilioService.callbackMessage(
+                contactPhone,
+                'Desculpe, não conseguimos encontrar seu número em nosso sistema. Por favor, entre em contato com o suporte para resolver essa questão.'
+            );
+        } else {
+            LOGGER('error', 'Error in backgroundProcess:', error);
+            throw error;
+        }
     }
 };
 
