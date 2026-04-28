@@ -29,7 +29,7 @@ export const execute = async (args, firebaseUserId) => {
         return {
             status: 'sucesso',
             id: docId,
-            mensagem: `Despesa de R$ ${args.valor} em ${args.categoria} salva com sucesso.`
+            mensagem: `Despesa de R$ ${args.value} em ${args.category} salva com sucesso.`
         };
     } catch (error) {
         return { status: 'erro', mensagem: error.message };
