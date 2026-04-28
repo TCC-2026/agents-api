@@ -36,6 +36,7 @@ const callAgent = async (context, history, message, media, firebaseUserId) => {
 
         LOGGER('info', `Enviando mensagem para o Assistant: `, payload);
         let { response, agentUsed } = await AiService.sendMessage(agent, payload);
+        LOGGER('info', `Resposta recebida do Assistant: `, response);
 
         if (response.functionCalls && response.functionCalls.length > 0) {
             const resultPayload = await handleFunctionCalls(response, payload, firebaseUserId);
