@@ -40,7 +40,9 @@ const callAgent = async (context, history, message, media, firebaseUserId) => {
 
         if (response.functionCalls && response.functionCalls.length > 0) {
             const resultPayload = await handleFunctionCalls(response, payload, firebaseUserId);
+            LOGGER('info', `Resposta da função: `, resultPayload);
             const finalResponse = await AiService.sendMessage(agentUsed, resultPayload);
+            LOGGER('info', `Resposta final do Assistant após execução da função: `, finalResponse);
 
             return {
                 text: finalResponse.response.text,
