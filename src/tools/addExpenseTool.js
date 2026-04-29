@@ -12,11 +12,15 @@ export const declaration = {
             },
             category: {
                 type: 'STRING',
-                description: 'A categoria da despesa (ex: Alimentação, Transporte, Lazer)'
+                description: 'A categoria da despesa (ex: Alimentação, Transporte, Lazer, ...)'
             },
             description: {
                 type: 'STRING',
-                description: 'Um breve resumo do que foi comprado'
+                description: 'descrição completa da despesa'
+            },
+            title: {
+                type: 'STRING',
+                description: 'Um título breve da transação em no máximo 3 palavras'
             }
         },
         required: ['value', 'category']

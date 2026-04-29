@@ -29,6 +29,7 @@ const addExpense = async (userId, data) => {
             category: data.category || 'Outros',
             date: new Date().toISOString(),
             description: data.description || '',
+            title: data.title || '',
             type: 'expense',
             value: Number(data.value)
         });
@@ -50,6 +51,7 @@ const addIncome = async (userId, data) => {
             category: data.category || 'Outros',
             date: new Date().toISOString(),
             description: data.description || '',
+            title: data.title || '',
             type: 'income',
             value: Number(data.value)
         });
