@@ -105,41 +105,50 @@ const constructContent = (history, message, media) => {
 };
 
 const handleFunctionCalls = async (response, payload, firebaseUserId) => {
-    const functionCall = response.functionCalls[0];
-    const { name, args } = functionCall;
+    // const functionCall = response.functionCalls[0];
+    try {
+        let funcsResponseArray = [];
 
-    LOGGER('info', `IA solicitou execução da função: ${name}`);
-    LOGGER('info', `Argumentos enviados pela IA:`, args);
+        for (const funcCall of response.functionCalls) {
+            const { name, args } = funcCall;
+            let functionResult;
 
-    let functionResult;
+            LOGGER('info', `IA solicitou execução da função: ${name}`);
 
-    if (availableTools[name]) {
-        functionResult = await availableTools[name].execute(args, firebaseUserId);
-    } else {
-        functionResult = { status: 'erro', mensagem: 'Função não encontrada.' };
-    }
-
-    const secondPayload = {
-        model: payload.model,
-        contents: [
-            ...payload.contents,
-            response.candidates[0].content,
-            {
-                role: 'user',
-                parts: [
-                    {
-                        functionResponse: {
-                            name: name,
-                            response: functionResult
-                        }
-                    }
-                ]
+            if (availableTools[name]) {
+                functionResult = await availableTools[name].execute(args, firebaseUserId);
+            } else {
+                functionResult = { status: 'erro', mensagem: 'Função não encontrada.' };
             }
-        ],
-        config: payload.config
-    };
 
-    return secondPayload;
+            let funcResponse = {
+                functionResponse: {
+                    name: name,
+                    response: functionResult
+                }
+            };
+
+            funcsResponseArray.push(funcResponse);
+        }
+
+        const secondPayload = {
+            model: payload.model,
+            contents: [
+                ...payload.contents,
+                response.candidates[0].content,
+                {
+                    role: 'user',
+                    parts: funcsResponseArray
+                }
+            ],
+            config: payload.config
+        };
+
+        return secondPayload;
+    } catch (error) {
+        LOGGER('error', 'Erro ao executar a função solicitada pela IA: ', error);
+        throw error;
+    }
 };
 
 export default { callAgent };
