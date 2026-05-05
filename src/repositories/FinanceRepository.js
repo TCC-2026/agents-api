@@ -23,7 +23,7 @@ const getUserIdByPhone = async (phone) => {
 // Despesa
 const addExpense = async (userId, data) => {
     try {
-        const despesasRef = db.collection('users').doc(userId).collection('despesas');
+        const despesasRef = db.collection('users').doc(userId).collection('transacoes');
 
         const docRef = await despesasRef.add({
             category: data.category || 'Outros',
@@ -45,7 +45,7 @@ const addExpense = async (userId, data) => {
 // Receita
 const addIncome = async (userId, data) => {
     try {
-        const receitasRef = db.collection('users').doc(userId).collection('receitas');
+        const receitasRef = db.collection('users').doc(userId).collection('transacoes');
 
         const docRef = await receitasRef.add({
             category: data.category || 'Outros',
