@@ -31,10 +31,13 @@ const getUserIdByPhone = async (phone) => {
 };
 
 // Despesa
-const addExpense = async (userId, data) => {
+const addExpense = async (session, data) => {
     try {
-        const despesasRef = db.collection('users').doc(userId).collection('transacoes');
+        // Valida e retorna userId
+        const userId = await getVerifiedUserId(session);
 
+        // Insere despesa no Firestore
+        const despesasRef = db.collection('users').doc(userId).collection('transacoes');
         const docRef = await despesasRef.add({
             category: data.category || 'Outros',
             date: new Date().toISOString(),
@@ -55,10 +58,11 @@ const addExpense = async (userId, data) => {
 // Receita
 const addIncome = async (session, data) => {
     try {
+        // Valida e retorna userId
         const userId = await getVerifiedUserId(session);
 
+        // Insere receita no Firestore
         const receitasRef = db.collection('users').doc(userId).collection('transacoes');
-
         const docRef = await receitasRef.add({
             category: data.category || 'Outros',
             date: new Date().toISOString(),

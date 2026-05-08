@@ -27,9 +27,9 @@ export const declaration = {
     }
 };
 
-export const execute = async (args, firebaseUserId) => {
+export const execute = async (args, session) => {
     try {
-        const docId = await FinanceRepository.addExpense(firebaseUserId, args);
+        const docId = await FinanceRepository.addExpense(session, args);
         return {
             status: 'sucesso',
             id: docId,

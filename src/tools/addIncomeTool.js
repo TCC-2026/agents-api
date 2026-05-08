@@ -32,7 +32,6 @@ export const declaration = {
 export const execute = async (args, session) => {
     try {
         const docId = await FinanceRepository.addIncome(session, args);
-
         return {
             status: 'sucesso',
             id: docId,
