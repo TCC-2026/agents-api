@@ -47,6 +47,10 @@ const backgroundProcess = async (contactPhone, message, mediaUrl, mimeType) => {
             );
         } else {
             LOGGER('error', 'Error in backgroundProcess:', error);
+            await TwilioService.callbackMessage(
+                contactPhone,
+                'Desculpe, ocorreu um problema em nosso sistema. Por favor, entre em contato com o suporte.'
+            );
         }
     }
 };
