@@ -1,16 +1,26 @@
 import db from '../config/firebase.js';
+import ChatRepository from '../repositories/ChatRepository.js';
 import LOGGER from '../utils/logger.js';
+
+const getUserById = async (userId) => {
+    try {
+        const usersRef = db.collection('users');
+        const user = await usersRef.doc(userId).get();
+
+        if (!user.exists) return null;
+        return user.id;
+    } catch (error) {
+        LOGGER('error', 'Erro ao buscar UID pelo telefone no Firestore:', error);
+        throw error;
+    }
+};
 
 const getUserIdByPhone = async (phone) => {
     try {
         // phone format expected (+5519123450000)
         const usersRef = db.collection('users');
         const user = await usersRef.where('phone', '==', phone).get();
-
-        LOGGER(
-            'info',
-            `Busca por usuário com telefone ${phone} retornou ${user.size} resultado(s) no Firestore.`
-        );
+        LOGGER('info', `Busca do usuário ${phone} retornou ${user.size} resultados do Firestore.`);
 
         if (user.empty) return null;
         return user.docs[0].id;
@@ -43,8 +53,10 @@ const addExpense = async (userId, data) => {
 };
 
 // Receita
-const addIncome = async (userId, data) => {
+const addIncome = async (session, data) => {
     try {
+        const userId = await getVerifiedUserId(session);
+
         const receitasRef = db.collection('users').doc(userId).collection('transacoes');
 
         const docRef = await receitasRef.add({
@@ -64,4 +76,27 @@ const addIncome = async (userId, data) => {
     }
 };
 
-export default { getUserIdByPhone, addExpense, addIncome };
+const getVerifiedUserId = async (session) => {
+    try {
+        let userId = await getUserById(session.firebaseUserId);
+
+        if (!userId) {
+            LOGGER('info', `Usuário com ID ${session.firebaseUserId} não encontrado no Firestore.`);
+            userId = await getUserIdByPhone(session.phone);
+
+            if (userId) {
+                ChatRepository.updateSessionFirebaseUserId(session.id, userId);
+            } else {
+                const error = new Error(`Usuário ${session.phone} não encontrado no Firestore.`);
+                error.code = 'FIRESTORE_USER_NOT_FOUND';
+                throw error;
+            }
+        }
+        return userId;
+    } catch (error) {
+        LOGGER('error', 'Erro ao verificar UID do usuário no Firestore:', error);
+        throw error;
+    }
+};
+
+export default { getUserIdByPhone, addExpense, addIncome, getUserById };

@@ -1,4 +1,5 @@
 import FinanceRepository from '../repositories/FinanceRepository.js';
+import LOGGER from '../utils/logger.js';
 
 export const declaration = {
     name: 'add_income',
@@ -28,9 +29,10 @@ export const declaration = {
     }
 };
 
-export const execute = async (args, firebaseUserId) => {
+export const execute = async (args, session) => {
     try {
-        const docId = await FinanceRepository.addIncome(firebaseUserId, args);
+        const docId = await FinanceRepository.addIncome(session, args);
+
         return {
             status: 'sucesso',
             id: docId,

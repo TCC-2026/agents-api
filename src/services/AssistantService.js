@@ -3,7 +3,7 @@ import AgentRepository from '../repositories/AgentRepository.js';
 import AiService from './AiService.js';
 import { availableTools, getGeminiToolsDeclaration } from '../tools/index.js';
 
-const callAgent = async (context, history, message, media, firebaseUserId) => {
+const callAgent = async (session, history, message, media) => {
     try {
         LOGGER('info', 'Iniciando o serviço de Assistant');
 
@@ -21,7 +21,7 @@ const callAgent = async (context, history, message, media, firebaseUserId) => {
 
         const prompt = agent.prompt.replace('${hoje}', hoje);
         const instructions =
-            prompt + ' \n DADOS DE SISTEMA - CONTEXTO ATUAL DO USUÁRIO: \n\n' + context;
+            prompt + ' \n CONTEXTO ATUAL DO USUÁRIO: \n\n' + session.currentContext || '';
         const content = constructContent(history, message, media);
 
         const payload = {
@@ -39,7 +39,7 @@ const callAgent = async (context, history, message, media, firebaseUserId) => {
         LOGGER('info', `Resposta recebida do Assistant: `, response);
 
         if (response.functionCalls && response.functionCalls.length > 0) {
-            const resultPayload = await handleFunctionCalls(response, payload, firebaseUserId);
+            const resultPayload = await handleFunctionCalls(response, payload, session);
             LOGGER('info', `Resposta da função: `, resultPayload);
             const finalResponse = await AiService.sendMessage(agentUsed, resultPayload);
             LOGGER('info', `Resposta final do Assistant após execução da função: `, finalResponse);
@@ -104,7 +104,7 @@ const constructContent = (history, message, media) => {
     }
 };
 
-const handleFunctionCalls = async (response, payload, firebaseUserId) => {
+const handleFunctionCalls = async (response, payload, session) => {
     // const functionCall = response.functionCalls[0];
     try {
         let funcsResponseArray = [];
@@ -116,7 +116,7 @@ const handleFunctionCalls = async (response, payload, firebaseUserId) => {
             LOGGER('info', `IA solicitou execução da função: ${name}`);
 
             if (availableTools[name]) {
-                functionResult = await availableTools[name].execute(args, firebaseUserId);
+                functionResult = await availableTools[name].execute(args, session);
             } else {
                 functionResult = { status: 'erro', mensagem: 'Função não encontrada.' };
             }

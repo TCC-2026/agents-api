@@ -64,6 +64,21 @@ const getSessionHistory = async (sessionId) => {
     }
 };
 
+const updateSessionFirebaseUserId = async (sessionId, firebaseUserId) => {
+    try {
+        return await prisma.session.update({
+            where: { id: sessionId },
+            data: {
+                firebaseUserId: firebaseUserId,
+                messages: [] // Limpa o histórico de mensagens
+            }
+        });
+    } catch (error) {
+        LOGGER('error', `Erro ao atualizar Firebase User ID da sessão ${sessionId}:`, error);
+        throw error;
+    }
+};
+
 const closeSession = async (sessionId) => {
     try {
         return await prisma.session.update({
@@ -81,5 +96,6 @@ export default {
     createSession,
     saveMessage,
     getSessionHistory,
-    closeSession
+    closeSession,
+    updateSessionFirebaseUserId
 };

@@ -46,13 +46,7 @@ const processMessage = async (contactPhone, messageText, mediaData) => {
         await ChatRepository.saveMessage(session.id, 'user', messageToSave.trimStart());
 
         // Chama a IA
-        const response = await AssistantService.callAgent(
-            session.currentContext || '',
-            history,
-            messageText,
-            mediaData,
-            session.firebaseUserId
-        );
+        const response = await AssistantService.callAgent(session, history, messageText, mediaData);
 
         // Salva a resposta da IA
         await ChatRepository.saveMessage(session.id, 'model', response.text, response.agentId);
