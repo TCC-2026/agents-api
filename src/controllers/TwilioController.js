@@ -47,7 +47,6 @@ const backgroundProcess = async (contactPhone, message, mediaUrl, mimeType) => {
             );
         } else {
             LOGGER('error', 'Error in backgroundProcess:', error);
-            throw error;
         }
     }
 };
