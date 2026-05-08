@@ -70,7 +70,9 @@ const updateSessionFirebaseUserId = async (sessionId, firebaseUserId) => {
             where: { id: sessionId },
             data: {
                 firebaseUserId: firebaseUserId,
-                messages: [] // Limpa o histórico de mensagens
+                messages: {
+                    deleteMany: {} // Limpa o histórico
+                }
             }
         });
     } catch (error) {

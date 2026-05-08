@@ -1,5 +1,4 @@
 import FinanceRepository from '../repositories/FinanceRepository.js';
-import LOGGER from '../utils/logger.js';
 
 export const declaration = {
     name: 'add_income',
