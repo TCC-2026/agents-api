@@ -21,9 +21,13 @@ export const declaration = {
             title: {
                 type: 'STRING',
                 description: 'Um título breve da transação em no máximo 3 palavras'
+            },
+            date: {
+                type: 'STRING',
+                description: 'Data da transação no formato ISO 8601 eg: 2026-05-24T12:00:00.000Z'
             }
         },
-        required: ['value', 'category']
+        required: ['value', 'category', 'date']
     }
 };
 

@@ -40,7 +40,7 @@ const addExpense = async (session, data) => {
         const despesasRef = db.collection('users').doc(userId).collection('transacoes');
         const docRef = await despesasRef.add({
             category: data.category || 'Outros',
-            date: new Date().toISOString(),
+            date: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
             description: data.description || '',
             title: data.title || '',
             type: 'expense',
@@ -65,7 +65,7 @@ const addIncome = async (session, data) => {
         const receitasRef = db.collection('users').doc(userId).collection('transacoes');
         const docRef = await receitasRef.add({
             category: data.category || 'Outros',
-            date: new Date().toISOString(),
+            date: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
             description: data.description || '',
             title: data.title || '',
             type: 'income',
