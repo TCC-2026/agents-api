@@ -25,7 +25,7 @@ export const declaration = {
             },
             date: {
                 type: 'STRING',
-                description: 'Data da transação no formato ISO 8601 (ex: 2026-05-24T12:00:00.000Z). Calcule a data correta baseada no dia atual caso o usuário use termos relativos como "ontem", "anteontem" ou "semana passada". Somente confirmar a data com o usuário se não estiver claro.'
+                description: 'Data da transação no formato ISO 8601 eg: 2026-05-24T12:00:00.000Z'
             }
         },
         required: ['value', 'category', 'date']
