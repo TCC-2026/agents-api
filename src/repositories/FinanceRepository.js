@@ -174,4 +174,4 @@ const getBalance = async (session, filters = {}) => {
     }
 };
 
-export default { getUserIdByPhone, setTransaction, getUserById, getTransactions };
+export default { getUserIdByPhone, setTransaction, getUserById, getTransactions, getBalance };
