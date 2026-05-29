@@ -36,7 +36,7 @@ const setTransaction = async (session, data) => {
         const userId = await getVerifiedUserId(session);
         const transacoesRef = db.collection('users').doc(userId).collection('transacoes');
 
-        if (data.id) { 
+        if (data.transaction_id) { 
             const updatePayload = {};
             
             if (data.type) updatePayload.type = data.type;
@@ -46,9 +46,9 @@ const setTransaction = async (session, data) => {
             if (data.description !== undefined) updatePayload.description = data.description;
             if (data.title !== undefined) updatePayload.title = data.title;
 
-            await transacoesRef.doc(data.id).update(updatePayload);
-            LOGGER('info', `Transação ${data.id} atualizada no Firestore para o user ${userId}`);
-            return data.id;
+            await transacoesRef.doc(data.transaction_id).update(updatePayload);
+            LOGGER('info', `Transação ${data.transaction_id} atualizada no Firestore para o user ${userId}`);
+            return data.transaction_id;
 
         } else { 
             const insertPayload = {
