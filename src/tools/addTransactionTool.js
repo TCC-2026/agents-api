@@ -37,7 +37,7 @@ export const declaration = {
 
 export const execute = async (args, session) => {
     try {
-        const docId = await FinanceRepository.addTransaction(session, args);
+        const docId = await FinanceRepository.setTransaction(session, args);
         return {
             status: 'sucesso',
             id: docId,
