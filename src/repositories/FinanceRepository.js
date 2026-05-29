@@ -30,52 +30,42 @@ const getUserIdByPhone = async (phone) => {
     }
 };
 
-// Despesa
-const addExpense = async (session, data) => {
+// Receitas e Despesas
+const setTransaction = async (session, data) => {
     try {
-        // Valida e retorna userId
         const userId = await getVerifiedUserId(session);
+        const transacoesRef = db.collection('users').doc(userId).collection('transacoes');
 
-        // Insere despesa no Firestore
-        const despesasRef = db.collection('users').doc(userId).collection('transacoes');
-        const docRef = await despesasRef.add({
-            category: data.category || 'Outros',
-            date: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
-            description: data.description || '',
-            title: data.title || '',
-            type: 'expense',
-            value: Number(data.value)
-        });
+        if (data.id) { 
+            const updatePayload = {};
+            
+            if (data.type) updatePayload.type = data.type;
+            if (data.value !== undefined) updatePayload.value = Number(data.value);
+            if (data.category) updatePayload.category = data.category;
+            if (data.date) updatePayload.date = new Date(data.date).toISOString();
+            if (data.description !== undefined) updatePayload.description = data.description;
+            if (data.title !== undefined) updatePayload.title = data.title;
 
-        LOGGER('info', `Despesa (R$ ${data.value}) inserida no Firestore para o user ${userId}`);
-        return docRef.id;
+            await transacoesRef.doc(data.id).update(updatePayload);
+            LOGGER('info', `Transação ${data.id} atualizada no Firestore para o user ${userId}`);
+            return data.id;
+
+        } else { 
+            const insertPayload = {
+                category: data.category || 'Outros',
+                date: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
+                description: data.description || '',
+                title: data.title || '',
+                type: data.type,
+                value: Number(data.value)
+            };
+            
+            const docRef = await transacoesRef.add(insertPayload);
+            LOGGER('info', `Nova transação (${data.type}) inserida no Firestore para o user ${userId}`);
+            return docRef.id;
+        }
     } catch (error) {
-        LOGGER('error', 'Erro ao inserir despesa no Firestore:', error);
-        throw error;
-    }
-};
-
-// Receita
-const addIncome = async (session, data) => {
-    try {
-        // Valida e retorna userId
-        const userId = await getVerifiedUserId(session);
-
-        // Insere receita no Firestore
-        const receitasRef = db.collection('users').doc(userId).collection('transacoes');
-        const docRef = await receitasRef.add({
-            category: data.category || 'Outros',
-            date: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
-            description: data.description || '',
-            title: data.title || '',
-            type: 'income',
-            value: Number(data.value)
-        });
-
-        LOGGER('info', `Receita (R$ ${data.value}) inserida no Firestore para o user ${userId}`);
-        return docRef.id;
-    } catch (error) {
-        LOGGER('error', 'Erro ao inserir receita no Firestore:', error);
+        LOGGER('error', 'Erro ao processar transação no Firestore:', error);
         throw error;
     }
 };
@@ -103,4 +93,85 @@ const getVerifiedUserId = async (session) => {
     }
 };
 
-export default { getUserIdByPhone, addExpense, addIncome, getUserById };
+const getTransactions = async (session, filters = {}) => {
+    try {
+        const userId = await getVerifiedUserId(session);
+        const transacoesRef = db.collection('users').doc(userId).collection('transacoes');
+        const snapshot = await transacoesRef.orderBy('date', 'desc').limit(100).get();
+
+        let transacoes = [];
+        snapshot.forEach(doc => {
+            transacoes.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Filtros de Data
+        if (filters.startDate) {
+            transacoes = transacoes.filter(t => t.date >= filters.startDate);
+        }
+        if (filters.endDate) {
+            transacoes = transacoes.filter(t => t.date <= filters.endDate);
+        }
+        
+        if (filters.type && filters.type !== 'all') {
+            transacoes = transacoes.filter(t => t.type === filters.type);
+        }
+        
+        LOGGER('info', `${transacoes.length} transações retornadas para o user ${userId}`);
+        return transacoes;
+
+    } catch (error) {
+        LOGGER('error', 'Erro ao consultar transações no Firestore:', error);
+        throw error;
+    }
+};
+
+const getBalance = async (session, filters = {}) => {
+    try {
+        const userId = await getVerifiedUserId(session);
+        
+        // 1. Acessa o documento do usuário para pegar o saldo inicial
+        const userRef = db.collection('users').doc(userId);
+        const userDoc = await userRef.get();
+        const userData = userDoc.data() || {};
+        
+        const initialBalance = Number(userData.initialBalance) || 0;
+
+        // 2. Acessa as transações
+        const transacoesRef = userRef.collection('transacoes');
+        const snapshot = await transacoesRef.get();
+
+        let totalIncome = 0;
+        let totalExpense = 0;
+
+        snapshot.forEach(doc => {
+            const t = doc.data();
+            const tDate = t.date;
+
+            if (filters.startDate && tDate < filters.startDate) return;
+            if (filters.endDate && tDate > filters.endDate) return;
+
+            if (t.type === 'income') {
+                totalIncome += Number(t.value) || 0;
+            } else if (t.type === 'expense') {
+                totalExpense += Number(t.value) || 0;
+            }
+        });
+
+        // 3. O saldo final  considera o dinheiro que ele já tinha
+        const saldoFinal = initialBalance + totalIncome - totalExpense;
+
+        LOGGER('info', `Saldo calculado para o user ${userId}: R$ ${saldoFinal} (Inicial: ${initialBalance})`);
+
+        return {
+            saldo_inicial: parseFloat(initialBalance.toFixed(2)),
+            total_receitas: parseFloat(totalIncome.toFixed(2)),
+            total_despesas: parseFloat(totalExpense.toFixed(2)),
+            saldo_atual: parseFloat(saldoFinal.toFixed(2))
+        };
+    } catch (error) {
+        LOGGER('error', 'Erro ao calcular saldo no Firestore:', error);
+        throw error;
+    }
+};
+
+export default { getUserIdByPhone, setTransaction, getUserById, getTransactions };
