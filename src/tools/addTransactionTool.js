@@ -40,7 +40,7 @@ export const execute = async (args, session) => {
         const docId = await FinanceRepository.setTransaction(session, args);
         return {
             status: 'sucesso',
-            id: docId,
+            transaction_id: docId,
             mensagem: `Transação de ${args.type} no valor de R$ ${args.value} em ${args.category} salva com sucesso.`
         };
     } catch (error) {

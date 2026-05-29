@@ -6,7 +6,7 @@ export const declaration = {
     parameters: {
         type: 'OBJECT',
         properties: {
-            id: {
+            transaction_id: {
                 type: 'STRING',
                 description: 'Obrigatório. O ID do documento da transação no Firestore (recuperado previamente via get_transactions).'
             },
@@ -44,8 +44,8 @@ export const execute = async (args, session) => {
         const resultId = await FinanceRepository.setTransaction(session, args);
         return {
             status: 'sucesso',
-            id: resultId,
-            mensagem: 'Transação atualizada com sucesso no banco de dados.'
+            transaction_id: resultId,
+            mensagem: 'Transação de ${args.type} no valor de R$ ${args.value} em ${args.category} atualizada com sucesso.'
         };
     } catch (error) {
         return { status: 'erro', mensagem: error.message };
