@@ -35,7 +35,7 @@ export const declaration = {
                 description: 'A nova data corrigida no formato ISO 8601.'
             }
         },
-        required: ['id']
+        required: ['transaction_id']
     }
 };
 
