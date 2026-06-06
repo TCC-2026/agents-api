@@ -174,4 +174,62 @@ const getBalance = async (session, filters = {}) => {
     }
 };
 
-export default { getUserIdByPhone, setTransaction, getUserById, getTransactions, getBalance };
+// Cria ou atualiza um limite
+const setSpendingLimit = async (session, data) => {
+    try {
+        const userId = await getVerifiedUserId(session);
+        const limitesRef = db.collection('users').doc(userId).collection('limites');
+
+        // Busca se já existe um limite para este tipo neste período
+        const snapshot = await limitesRef
+            .where('tipo', '==', data.category)
+            .where('periodo', '==', data.period)
+            .get();
+
+        if (snapshot.empty) {
+            // INSERÇÃO: Não existe limite para essa categoria neste mês
+            const payload = {
+                tipo: data.category,
+                periodo: data.period,
+                limitemax: Number(data.limitMax)
+            };
+            const docRef = await limitesRef.add(payload);
+            LOGGER('info', `Novo limite de ${data.category} inserido para o user ${userId}`);
+            return docRef.id;
+        } else {
+            // ATUALIZAÇÃO: Já existe, então atualiza o valor
+            const docId = snapshot.docs[0].id;
+            await limitesRef.doc(docId).update({
+                limitemax: Number(data.limitMax)
+            });
+            LOGGER('info', `Limite de ${data.category} atualizado para o user ${userId}`);
+            return docId;
+        }
+    } catch (error) {
+        LOGGER('error', 'Erro ao configurar limite no Firestore:', error);
+        throw error;
+    }
+};
+
+// Consulta os limites de um mês
+const getSpendingLimits = async (session, period) => {
+    try {
+        const userId = await getVerifiedUserId(session);
+        const limitesRef = db.collection('users').doc(userId).collection('limites');
+
+        const snapshot = await limitesRef.where('periodo', '==', period).get();
+
+        let limites = [];
+        snapshot.forEach(doc => {
+            limites.push({ id: doc.id, ...doc.data() });
+        });
+
+        LOGGER('info', `${limites.length} limites retornados para o user ${userId}`);
+        return limites;
+    } catch (error) {
+        LOGGER('error', 'Erro ao consultar limites no Firestore:', error);
+        throw error;
+    }
+};
+
+export default { getUserIdByPhone, setTransaction, getUserById, getTransactions, getBalance, setSpendingLimit, getSpendingLimits };
