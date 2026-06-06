@@ -174,7 +174,6 @@ const getBalance = async (session, filters = {}) => {
     }
 };
 
-// Cria ou atualiza um limite
 const setSpendingLimit = async (session, data) => {
     try {
         const userId = await getVerifiedUserId(session);
@@ -187,7 +186,6 @@ const setSpendingLimit = async (session, data) => {
             .get();
 
         if (snapshot.empty) {
-            // INSERÇÃO: Não existe limite para essa categoria neste mês
             const payload = {
                 tipo: data.category,
                 periodo: data.period,
@@ -197,7 +195,6 @@ const setSpendingLimit = async (session, data) => {
             LOGGER('info', `Novo limite de ${data.category} inserido para o user ${userId}`);
             return docRef.id;
         } else {
-            // ATUALIZAÇÃO: Já existe, então atualiza o valor
             const docId = snapshot.docs[0].id;
             await limitesRef.doc(docId).update({
                 limitemax: Number(data.limitMax)
@@ -211,7 +208,6 @@ const setSpendingLimit = async (session, data) => {
     }
 };
 
-// Consulta os limites de um mês
 const getSpendingLimits = async (session, period) => {
     try {
         const userId = await getVerifiedUserId(session);

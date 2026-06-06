@@ -1,8 +1,8 @@
 import FinanceRepository from '../repositories/FinanceRepository.js';
 
 export const declaration = {
-    name: 'add_spending_limit',
-    description: 'Cria um novo limite máximo de gastos para uma categoria em um determinado mês.',
+    name: 'set_spending_limit',
+    description: 'Cria ou atualiza o limite máximo de gastos para uma categoria em um determinado mês.',
     parameters: {
         type: 'OBJECT',
         properties: {
