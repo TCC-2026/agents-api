@@ -136,7 +136,7 @@ const handleFunctionCalls = async (response, agentUsed, payload, session) => {
         }
 
         const responseFormat = {
-            role: 'function',
+            role: 'user',
             parts: funcsResponseArray
         }
 
