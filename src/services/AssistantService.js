@@ -62,16 +62,9 @@ const callAgent = async (session, history, message, media) => {
 };
 
 const constructContent = (history, message, media) => {
-    let content = [];
+    let content = history && Array.isArray(history) ? [...history] : [];
 
     try {
-        if (history) {
-            content = history.map((msg) => ({
-                role: msg.role === 'assistant' ? 'model' : msg.role,
-                parts: [{ text: msg.content }]
-            }));
-        }
-
         const userMessageParts = [];
 
         if (message && message.trim() !== '') {
@@ -93,6 +86,7 @@ const constructContent = (history, message, media) => {
 
         LOGGER('info', `userMessageParts: `, userMessageParts);
 
+        // Adiciona a mensagem atual no final da conversa
         content.push({
             role: 'user',
             parts: userMessageParts
