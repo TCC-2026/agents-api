@@ -129,12 +129,8 @@ const getBalance = async (session, filters = {}) => {
     try {
         const userId = await getVerifiedUserId(session);
         
-        // 1. Acessa o documento do usuário para pegar o saldo inicial
+        // 1. Acessa o usuário
         const userRef = db.collection('users').doc(userId);
-        const userDoc = await userRef.get();
-        const userData = userDoc.data() || {};
-        
-        const initialBalance = Number(userData.initialBalance) || 0;
 
         // 2. Acessa as transações
         const transacoesRef = userRef.collection('transacoes');
@@ -157,13 +153,12 @@ const getBalance = async (session, filters = {}) => {
             }
         });
 
-        // 3. O saldo final  considera o dinheiro que ele já tinha
-        const saldoFinal = initialBalance + totalIncome - totalExpense;
+        // 3. O saldo final considera o dinheiro que ele já tinha (Saldo inicial está em Incomes)
+        const saldoFinal = totalIncome - totalExpense;
 
-        LOGGER('info', `Saldo calculado para o user ${userId}: R$ ${saldoFinal} (Inicial: ${initialBalance})`);
+        LOGGER('info', `Saldo calculado para o user ${userId}: R$ ${saldoFinal}`);
 
         return {
-            saldo_inicial: parseFloat(initialBalance.toFixed(2)),
             total_receitas: parseFloat(totalIncome.toFixed(2)),
             total_despesas: parseFloat(totalExpense.toFixed(2)),
             saldo_atual: parseFloat(saldoFinal.toFixed(2))
