@@ -45,7 +45,7 @@ export const execute = async (args, session) => {
         return {
             status: 'sucesso',
             transaction_id: resultId,
-            mensagem: 'Transação de ${args.type} no valor de R$ ${args.value} em ${args.category} atualizada com sucesso.'
+            mensagem: `Transação de ${args.type} no valor de R$ ${args.value} em ${args.category} atualizada com sucesso.`
         };
     } catch (error) {
         return { status: 'erro', mensagem: error.message };

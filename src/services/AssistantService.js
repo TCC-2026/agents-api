@@ -1,5 +1,6 @@
 import LOGGER from '../utils/logger.js';
 import AgentRepository from '../repositories/AgentRepository.js';
+import ChatRepository from '../repositories/ChatRepository.js';
 import AiService from './AiService.js';
 import { availableTools, getGeminiToolsDeclaration } from '../tools/index.js';
 
@@ -39,7 +40,7 @@ const callAgent = async (session, history, message, media) => {
         LOGGER('info', `Resposta recebida do Assistant: `, response);
 
         if (response.functionCalls && response.functionCalls.length > 0) {
-            const resultPayload = await handleFunctionCalls(response, payload, session);
+            const resultPayload = await handleFunctionCalls(response, agentUsed, payload, session);
             LOGGER('info', `Resposta da função: `, resultPayload);
             const finalResponse = await AiService.sendMessage(agentUsed, resultPayload);
             LOGGER('info', `Resposta final do Assistant após execução da função: `, finalResponse);
@@ -104,10 +105,13 @@ const constructContent = (history, message, media) => {
     }
 };
 
-const handleFunctionCalls = async (response, payload, session) => {
+const handleFunctionCalls = async (response, agentUsed, payload, session) => {
     // const functionCall = response.functionCalls[0];
     try {
         let funcsResponseArray = [];
+
+        // Salva a function call da IA
+        await ChatRepository.saveMessage(session.id, 'functionCall', JSON.stringify(response.functionCalls), agentUsed.id);
 
         for (const funcCall of response.functionCalls) {
             const { name, args } = funcCall;
@@ -131,15 +135,20 @@ const handleFunctionCalls = async (response, payload, session) => {
             funcsResponseArray.push(funcResponse);
         }
 
+        const responseFormat = {
+            role: 'function',
+            parts: funcsResponseArray
+        }
+
+        // Salva a function response da IA
+        await ChatRepository.saveMessage(session.id, 'functionResponse', JSON.stringify(responseFormat), agentUsed.id);
+
         const secondPayload = {
             model: payload.model,
             contents: [
                 ...payload.contents,
                 response.candidates[0].content,
-                {
-                    role: 'user',
-                    parts: funcsResponseArray
-                }
+                responseFormat
             ],
             config: payload.config
         };

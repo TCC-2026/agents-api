@@ -49,7 +49,7 @@ const saveMessage = async (sessionId, role, content, agentId = null) => {
 
 const getSessionHistory = async (sessionId) => {
     try {
-        return await prisma.message.findMany({
+        const messages = await prisma.message.findMany({
             where: {
                 sessionId: sessionId
             },
@@ -58,10 +58,45 @@ const getSessionHistory = async (sessionId) => {
             },
             take: 50 // Limite de segurança
         });
+
+        return buildHistory(messages.reverse());
     } catch (error) {
         LOGGER('error', `Erro ao buscar histórico da sessão ${sessionId}:`, error);
         throw error;
     }
+};
+
+const buildHistory = (mensagensDoBanco) => {
+    return mensagensDoBanco.map(msg => {
+        
+        // Mensagens normais de texto
+        if (msg.role === 'user' || msg.role === 'model') {
+            return {
+                role: msg.role,
+                parts: [{ text: msg.content }]
+            };
+        }
+
+        // functionCalls
+        if (msg.role === 'functionCall') {
+            const callsArray = JSON.parse(msg.content);
+            
+            return {
+                role: 'model',
+                parts: callsArray.map(call => ({
+                    functionCall: {
+                        name: call.name,
+                        args: call.args
+                    }
+                }))
+            };
+        }
+
+        // functionResponse
+        if (msg.role === 'functionResponse') {
+            return JSON.parse(msg.content);
+        }
+    });
 };
 
 const updateSessionFirebaseUserId = async (sessionId, firebaseUserId) => {

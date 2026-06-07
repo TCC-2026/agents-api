@@ -32,13 +32,7 @@ const processMessage = async (contactPhone, messageText, mediaData) => {
 
     try {
         // Busca o histórico de mensagens
-        const rawHistory = await ChatRepository.getSessionHistory(session.id);
-        const history = rawHistory
-            .map((msg) => ({
-                role: msg.role,
-                content: msg.content
-            }))
-            .reverse();
+        const history = await ChatRepository.getSessionHistory(session.id);
         LOGGER('info', `Sessão ${session.id}. ${history.length} mensagens:`, history);
 
         // Salva a mensagem do usuário
@@ -48,7 +42,7 @@ const processMessage = async (contactPhone, messageText, mediaData) => {
         // Chama a IA
         const response = await AssistantService.callAgent(session, history, messageText, mediaData);
 
-        // Salva a resposta da IA
+        // Salva a resposta de texto da IA
         await ChatRepository.saveMessage(session.id, 'model', response.text, response.agentId);
 
         return response.text;
