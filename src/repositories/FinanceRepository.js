@@ -223,4 +223,88 @@ const getSpendingLimits = async (session, period) => {
     }
 };
 
-export default { getUserIdByPhone, setTransaction, getUserById, getTransactions, getBalance, setSpendingLimit, getSpendingLimits };
+const getUserContext = async (userId) => {
+    try {
+        // Dados Básicos do Usuário
+        const userRef = db.collection('users').doc(userId);
+        const userDoc = await userRef.get();
+        
+        if (!userDoc.exists) {
+            return 'Usuário novo. Nenhum dado de perfil encontrado.';
+        }
+        
+        const userData = userDoc.data();
+        const nome = userData.name || 'Usuário';
+        const initialBalance = Number(userData.initialBalance) || 0;
+
+        // Mês Atual e Mês Anterior
+        const now = new Date();
+        const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const endOfCurrentMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+        // Transações
+        const transacoesRef = userRef.collection('transacoes');
+        const snapshot = await transacoesRef.get();
+
+        let totalIncome = 0;
+        let totalExpense = 0;
+        const historicoRecente = [];
+
+        snapshot.forEach(doc => {
+            const t = doc.data();
+            const tDate = new Date(t.date);
+
+            // Soma para o saldo global
+            if (t.type === 'income') totalIncome += Number(t.value) || 0;
+            else if (t.type === 'expense') totalExpense += Number(t.value) || 0;
+
+            // Filtra para o Contexto da IA ( mês passado e atual)
+            if (tDate >= startOfLastMonth && tDate <= endOfCurrentMonth) {
+                historicoRecente.push({
+                    id: doc.id,
+                    data: t.date.split('T')[0],
+                    tipo: t.type,
+                    categoria: t.category,
+                    valor: t.value,
+                    titulo: t.title
+                });
+            }
+        });
+
+        const saldoAtual = initialBalance + totalIncome - totalExpense;
+
+        // Busca os Limites
+        const limitesRef = userRef.collection('limites');
+        const limitesSnapshot = await limitesRef.get();
+        
+        const limitesConfigurados = [];
+        limitesSnapshot.forEach(doc => {
+            limitesConfigurados.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+
+        // Monta o Contexto em formato JSON
+        const contextoObjeto = {
+            perfil: {
+                nome: nome,
+                saldo_atual: Number(saldoAtual.toFixed(2))
+            },
+            limites_de_gastos: limitesConfigurados,
+            extrato_mes_atual_e_anterior: historicoRecente
+        };
+
+        // Transforma o objeto em uma string formatada para a IA ler facilmente
+        const contextoString = JSON.stringify(contextoObjeto, null, 2);
+
+        LOGGER('info', `Contexto gerado para o usuário ${userId}`);
+        return contextoString;
+
+    } catch (error) {
+        LOGGER('error', 'Erro ao buscar contexto do usuário:', error);
+        return 'Contexto financeiro temporariamente indisponível.';
+    }
+};
+
+export default { getUserIdByPhone, setTransaction, getUserById, getTransactions, getBalance, setSpendingLimit, getSpendingLimits, getUserContext };

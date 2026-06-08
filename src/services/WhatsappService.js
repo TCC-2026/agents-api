@@ -18,6 +18,8 @@ const processMessage = async (contactPhone, messageText, mediaData) => {
                 throw error;
             }
 
+            const userContext = await FinanceRepository.getUserContext(firebaseUserId);
+
             session = await ChatRepository.createSession(
                 contactPhone,
                 'O usuário é novo no app.',

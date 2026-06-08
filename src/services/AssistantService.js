@@ -22,7 +22,7 @@ const callAgent = async (session, history, message, media) => {
 
         const prompt = agent.prompt.replace('${hoje}', hoje);
         const instructions =
-            prompt + ' \n CONTEXTO ATUAL DO USUÁRIO: \n\n' + session.currentContext || '';
+            prompt + ' \n\nCONTEXTO ATUAL DO USUÁRIO: \n' + session.currentContext || '';
         const content = constructContent(history, message, media);
 
         const payload = {
