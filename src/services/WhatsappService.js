@@ -22,7 +22,7 @@ const processMessage = async (contactPhone, messageText, mediaData) => {
 
             session = await ChatRepository.createSession(
                 contactPhone,
-                'O usuário é novo no app.',
+                userContext,
                 firebaseUserId
             );
             LOGGER('info', `Sessão ${session.id} criada (Firebase User ID: ${firebaseUserId}).`);
