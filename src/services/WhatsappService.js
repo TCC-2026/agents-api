@@ -26,6 +26,9 @@ const processMessage = async (contactPhone, messageText, mediaData) => {
                 firebaseUserId
             );
             LOGGER('info', `Sessão ${session.id} criada (Firebase User ID: ${firebaseUserId}).`);
+        } else {
+            const freshContext = await FinanceRepository.getUserContext(session.firebaseUserId);
+            session.currentContext = freshContext;
         }
     } catch (error) {
         LOGGER('error', 'Error in whatsapp service finding session:', error);
