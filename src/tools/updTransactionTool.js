@@ -30,9 +30,9 @@ export const declaration = {
                 type: 'STRING',
                 description: 'O novo título corrigido.'
             },
-            date: {
+            dateTime: {
                 type: 'STRING',
-                description: 'A nova data corrigida no formato ISO 8601.'
+                description: 'A nova data e hora corrigida no formato ISO 8601. eg: 2026-05-24T12:20:33.000Z.'
             }
         },
         required: ['transaction_id']

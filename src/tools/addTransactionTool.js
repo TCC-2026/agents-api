@@ -26,9 +26,9 @@ export const declaration = {
                 type: 'STRING',
                 description: 'Um título breve em no máximo 3 palavras'
             },
-            date: {
+            dateTime: {
                 type: 'STRING',
-                description: 'Data no formato ISO 8601 eg: 2026-05-24T12:00:00.000Z. Se o usuário não informar uma data específica, assuma sempre a data de hoje.'
+                description: 'Data e hora exatamente no formato ISO 8601 eg: 2026-05-24T12:20:33.000Z. Se o usuário não informar uma data específica, assuma sempre a data e horário atual.'
             }
         },
         required: ['type', 'value', 'category', 'date']
