@@ -28,7 +28,7 @@ export const declaration = {
             },
             dateTime: {
                 type: 'STRING',
-                description: 'Data e hora exatamente no formato ISO 8601 eg: 2026-05-24T12:20:33.000Z. Se o usuário não informar uma data específica, assuma sempre a data e horário atual.'
+                description: 'Data e hora da transação exatamente no formato ISO 8601 eg: 2026-05-24T12:20:33.000Z. Se o usuário não informar uma data específica, assuma sempre a data e horário atual.'
             }
         },
         required: ['type', 'value', 'category', 'dateTime']
