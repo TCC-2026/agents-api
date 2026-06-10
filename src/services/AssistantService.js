@@ -8,7 +8,9 @@ const callAgent = async (session, history, message, media) => {
     try {
         LOGGER('info', 'Iniciando o serviço de Assistant');
 
-        const hoje = new Date().toLocaleDateString('pt-BR');
+        const data = new Date();
+        data.setHours(data.getHours() + 3);
+        const hoje = data.toLocaleString('pt-BR');
         const agent = await AgentRepository.selectAgentByService(
             'Assistant',
             process.env.PRIMARY_ASSISTANT_MODEL

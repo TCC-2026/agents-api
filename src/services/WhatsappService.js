@@ -48,7 +48,9 @@ const processMessage = async (contactPhone, messageText, mediaData) => {
         const response = await AssistantService.callAgent(session, history, messageText, mediaData);
 
         // Salva a resposta de texto da IA
-        await ChatRepository.saveMessage(session.id, 'model', response.text, response.agentId);
+        if (response.text) {
+            await ChatRepository.saveMessage(session.id, 'model', response.text, response.agentId);
+        }
 
         return response.text;
     } catch (error) {
