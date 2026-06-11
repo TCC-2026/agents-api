@@ -42,7 +42,7 @@ const setTransaction = async (session, data) => {
             if (data.type) updatePayload.type = data.type;
             if (data.value !== undefined) updatePayload.value = Number(data.value);
             if (data.category) updatePayload.category = data.category;
-            if (data.date) updatePayload.date = new Date(data.date).toISOString();
+            if (data.dateTime) updatePayload.dateTime = new Date(data.dateTime).toISOString();
             if (data.description !== undefined) updatePayload.description = data.description;
             if (data.title !== undefined) updatePayload.title = data.title;
 
@@ -53,7 +53,7 @@ const setTransaction = async (session, data) => {
         } else { 
             const insertPayload = {
                 category: data.category || 'Outros',
-                date: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
+                date: data.dateTime ? new Date(data.dateTime).toISOString() : new Date().toISOString(),
                 description: data.description || '',
                 title: data.title || '',
                 type: data.type,
