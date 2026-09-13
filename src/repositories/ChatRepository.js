@@ -128,11 +128,47 @@ const closeSession = async (sessionId) => {
     }
 };
 
+const findSessionByPhone = async (phone) => {
+    try {
+        return await prisma.session.findUnique({
+            where: { phone: phone }
+        });
+    } catch (error) {
+        LOGGER('error', `Erro ao buscar sessão para o telefone ${phone}:`, error);
+        throw error;
+    }
+};
+
+const clearMessages = async (sessionId) => {
+    try {
+        return await prisma.message.deleteMany({
+            where: { sessionId: sessionId }
+        });
+    } catch (error) {
+        LOGGER('error', `Erro ao limpar mensagens da sessão ${sessionId}:`, error);
+        throw error;
+    }
+};
+
+const deleteSessionByPhone = async (phone) => {
+    try {
+        return await prisma.session.delete({
+            where: { phone: phone }
+        });
+    } catch (error) {
+        LOGGER('error', `Erro ao excluir sessão do telefone ${phone}:`, error);
+        throw error;
+    }
+};
+
 export default {
     findActiveSessionByPhone,
     createSession,
     saveMessage,
     getSessionHistory,
     closeSession,
-    updateSessionFirebaseUserId
+    updateSessionFirebaseUserId,
+    findSessionByPhone,
+    clearMessages,
+    deleteSessionByPhone
 };
