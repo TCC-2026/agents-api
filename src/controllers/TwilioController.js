@@ -8,12 +8,13 @@ const webhook = async (req, res) => {
         const contactPhone = req.body.From.replace('whatsapp:', ''); // ex: 'whatsapp:+5511999999999'
         const mediaUrl = req.body.MediaUrl0;
         const mimeType = req.body.MediaContentType0;
+        const messageSid = req.body.MessageSid;
 
         LOGGER('info', `Mensagem recebida do WhatsApp (${contactPhone}): ${message}.`);
         res.status(200).send('OK');
 
         // Continuar o processamento assíncrono em background
-        backgroundProcess(contactPhone, message, mediaUrl, mimeType);
+        backgroundProcess(contactPhone, message, mediaUrl, mimeType, messageSid);
     } catch (error) {
         LOGGER('error', 'Erro crítico no Webhook do WhatsApp:', error);
 
@@ -23,8 +24,11 @@ const webhook = async (req, res) => {
     }
 };
 
-const backgroundProcess = async (contactPhone, message, mediaUrl, mimeType) => {
+const backgroundProcess = async (contactPhone, message, mediaUrl, mimeType, messageSid) => {
     try {
+        // Dispara o "digitando..." sem aguardar — não deve atrasar o processamento real
+        TwilioService.sendTypingIndicator(messageSid);
+
         // Baixa a mídia
         let media = null;
         if (mediaUrl && mimeType) media = await TwilioService.downloadMedia(mediaUrl, mimeType);

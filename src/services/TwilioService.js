@@ -31,6 +31,35 @@ const downloadMedia = async (mediaUrl, mimeType) => {
     }
 };
 
+const sendTypingIndicator = async (messageSid) => {
+    if (!messageSid) return;
+
+    try {
+        const twilioApiAuth = Buffer.from(
+            `${process.env.TWILIO_API_KEY}:${process.env.TWILIO_API_SECRET}`
+        ).toString('base64');
+
+        const response = await fetch('https://messaging.twilio.com/v3/Indicators/Typing.json', {
+            method: 'POST',
+            headers: {
+                Authorization: `Basic ${twilioApiAuth}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                channel: 'WHATSAPP',
+                messageId: messageSid
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Twilio recusou o indicador de digitação: ${response.statusText}`);
+        }
+    } catch (error) {
+        // Recurso apenas visual (Public Beta) — não deve interromper o fluxo de resposta.
+        LOGGER('warn', 'Erro ao enviar indicador de digitação via Twilio:', error);
+    }
+};
+
 const callbackMessage = async (to, text) => {
     try {
         await twilioClient.messages.create({
@@ -45,4 +74,4 @@ const callbackMessage = async (to, text) => {
     }
 };
 
-export default { downloadMedia, callbackMessage };
+export default { downloadMedia, callbackMessage, sendTypingIndicator };
